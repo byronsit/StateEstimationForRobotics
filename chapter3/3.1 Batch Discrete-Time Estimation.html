@@ -1,0 +1,978 @@
+
+				<!DOCTYPE html>
+				<html>
+					<head>
+						<meta charset="UTF-8">
+						<link rel="stylesheet" href="pluginAssets/katex/katex.css"><script type="application/javascript" src="pluginAssets/mermaid/mermaid.min.js"></script><script type="application/javascript" src="pluginAssets/mermaid/mermaid_render.js"></script><link rel="stylesheet" href="pluginAssets/highlight.js/atom-one-light.css">
+						<title>3.1 Batch Discrete-Time Estimation</title>
+					</head>
+					<body>
+						<div class="exported-note"><div class="exported-note-title">3.1 Batch Discrete-Time Estimation</div>
+
+<style>
+		/* https://necolas.github.io/normalize.css/ */
+		html{line-height:1.15;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}
+		article,aside,footer,header,nav,section{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}
+		pre{font-family:monospace,monospace;font-size:1em}a{background-color:transparent;-webkit-text-decoration-skip:objects}
+		b,strong{font-weight:bolder}small{font-size:80%}img{border-style:none}
+
+		body {
+			font-size: 15px;
+			color: #32373F;
+			word-wrap: break-word;
+			line-height: 1.6em;
+			background-color: #ffffff;
+			font-family: 'Avenir', 'Arial', sans-serif;
+			padding-bottom: 0px;
+			padding-top: 0px;
+		}
+		strong {
+			color: #000000;
+		}
+		kbd {
+			border: 1px solid rgb(220, 220, 220);
+			box-shadow: inset 0 -1px 0 rgb(220, 220, 220);
+			padding: 2px 4px;
+			border-radius: 3px;
+			background-color: rgb(243, 243, 243);
+		}
+		::-webkit-scrollbar {
+			width: 7px;
+			height: 7px;
+		}
+		::-webkit-scrollbar-corner {
+			background: none;
+		}
+		::-webkit-scrollbar-track {
+			border: none;
+		}
+		::-webkit-scrollbar-thumb {
+			background: rgba(100, 100, 100, 0.3); 
+			border-radius: 5px;
+		}
+		::-webkit-scrollbar-track:hover {
+			background: rgba(0, 0, 0, 0.1); 
+		}
+		::-webkit-scrollbar-thumb:hover {
+			background: rgba(100, 100, 100, 0.7); 
+		}
+
+		/* Remove top padding and margin from first child so that top of rendered text is aligned to top of text editor text */
+
+		#rendered-md > h1:first-child,
+		#rendered-md > h2:first-child,
+		#rendered-md > h3:first-child,
+		#rendered-md > h4:first-child,
+		#rendered-md > ul:first-child,
+		#rendered-md > ol:first-child,
+		#rendered-md > table:first-child,
+		#rendered-md > blockquote:first-child,
+		#rendered-md > img:first-child,
+		#rendered-md > p:first-child {
+			margin-top: 0;
+			padding-top: 0;
+		}
+		
+		p, h1, h2, h3, h4, h5, h6, ul, table {
+			margin-top: .6em;
+			margin-bottom: .65em;
+
+			/*
+				Adds support for RTL text in the note body. It automatically detects the direction using the content.
+				Issue: https://github.com/laurent22/joplin/issues/3991
+			*/
+			unicode-bidi: plaintext;
+		}
+		h1, h2, h3, h4, h5, h6 {
+			line-height: 1.5em;
+		}
+		h1 {
+			font-size: 1.5em;
+			font-weight: bold;
+			border-bottom: 1px solid #dddddd;
+			padding-bottom: .3em;
+		}
+		h2 {
+			font-size: 1.3em;
+			font-weight: bold;
+			padding-bottom: .1em; */
+		}
+		h3 {
+			font-size: 1.1em;
+		}
+		h4, h5, h6 {
+			font-size: 1em;
+			font-weight: bold;
+		}
+
+		.exported-note-title {
+			font-size: 2em;
+			font-weight: bold;
+			margin-bottom: 0.8em;
+			line-height: 1.5em;
+			padding-bottom: .35em;
+			border-bottom: 1px solid #dddddd;
+		}
+
+		a {
+			color: #155BDA;
+		}
+		ul, ol {
+			padding-left: 0;
+			margin-left: 1.7em;
+		}
+		li {
+			margin-bottom: .4em;
+		}
+		li p {
+			margin-top: 0.2em;
+			margin-bottom: 0;
+		}
+
+		.resource-icon {
+			display: inline-block;
+			position: relative;
+			top: 0.3em;
+			text-decoration: none;
+			width: 1.2em;
+			height: 1.4em;
+			margin-right: 0.4em;
+			background-color:  #155BDA;
+		}
+    /* These icons are obtained from the wonderful ForkAwesome project by copying the src svgs 
+     * into the css classes below.
+     * svgs are obtained from https://github.com/ForkAwesome/Fork-Awesome/tree/master/src/icons/svg
+     * instead of the svg width, height property you must use a viewbox here, 0 0 1536 1792 is typically the actual size of the icon
+     * each line begins with the pre-amble -webkit-mask: url("data:image/svg+xml;utf8,
+     * and of course finishes with ");
+     * to precvent artifacts it is also necessary to include -webkit-mask-repeat: no-repeat;
+     * on the following line
+     * */
+		.fa-joplin {
+			/* Awesome Font file */
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M373.834 128C168.227 128 0 296.223 0 501.834v788.336C0 1495.778 168.227 1664 373.834 1664h788.336c205.608 0 373.83-168.222 373.83-373.83V501.834C1536 296.224 1367.778 128 1162.17 128zm397.222 205.431h417.424a7.132 7.132 0 0 1 7.132 7.133v132.552c0 4.461-3.619 8.073-8.077 8.073h-57.23c-24.168 0-43.768 19.338-44.284 43.374v2.377h-.017v136.191h-.053l-.466 509.375c-5.02 77.667-39.222 149.056-96.324 201.046-60.28 54.834-141.948 85.017-229.962 85.017-12.45 0-25.208-.61-37.907-1.785-92.157-8.682-181.494-48.601-251.662-112.438-71.99-65.517-117.147-150.03-127.164-238-11.226-98.763 23.42-192.783 95.045-257.937 81.99-74.637 198.185-101.768 316.613-75.704 5.574 1.227 9.55 6.282 9.55 11.997v199.52c-.199 2.625-1.481 6.599-8.183 2.896-.663-.365-1.194-.511-1.653-.531-21.987-10.587-45.159-17.57-68.559-19.916-.38-.04-.757-.124-1.138-.163-.537-.048-1.034-.033-1.556-.075-4.13-.354-8.183-.517-12.203-.58-.87-.011-1.771-.127-2.641-.127-.486 0-.951.05-1.437.057-1.464.011-2.886.115-4.33.163-2.76.102-5.497.211-8.182.448-.273.024-.547.07-.835.097-25.509 2.4-47.864 11.104-65.012 25.47-.954.802-1.974 1.53-2.9 2.36a1.34 1.34 0 0 1-.168.146c-23.96 21.8-34.881 53.872-30.726 90.316 4.62 40.737 26.94 81.156 62.841 113.823 35.908 32.67 80.335 52.977 125.113 57.186 35.118 3.36 66.547-3.919 89.899-20.461a97.255 97.255 0 0 0 9.365-7.501c2.925-2.661 5.569-5.5 8.086-8.416.3-.348.672-.673.975-1.024 8.253-9.864 14.222-21.067 17.996-33.148.639-2.034 1.051-4.148 1.564-6.227.381-1.563.81-3.106 1.112-4.693.555-2.784.923-5.632 1.253-8.49.086-.709.183-1.414.237-2.128.492-4.893.693-9.858.55-14.91h.013V521.623c-2.01-22.626-20.78-40.434-43.928-40.434h-57.23a8.071 8.071 0 0 1-8.077-8.073V340.564a7.132 7.132 0 0 1 7.136-7.133z'/></svg>");
+		}
+		.fa-file-image {
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M1468 380c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H128v1536h1280zm-128-448v320H256v-192l192-192 128 128 384-384zm-832-192c-106 0-192-86-192-192s86-192 192-192 192 86 192 192-86 192-192 192z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		.fa-file-pdf {
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M1468 380c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H128v1536h1280zm-514-593c25 20 53 38 84 56 42-5 81-7 117-7 67 0 152 8 177 49 7 10 13 28 2 52-1 1-2 3-3 4v1c-3 18-18 38-71 38-64 0-161-29-245-73-139 15-285 46-392 83-103 176-182 262-242 262-10 0-19-2-28-7l-24-12c-3-1-4-3-6-5-5-5-9-16-6-36 10-46 64-123 188-188 8-5 18-2 23 6 1 1 2 3 2 4 31-51 67-116 107-197 45-90 80-178 104-262-32-109-42-221-24-287 7-25 22-40 42-40h22c15 0 27 5 35 15 12 14 15 36 9 68-1 3-2 6-4 8 1 3 1 5 1 8v30c-1 63-2 123-14 192 35 105 87 190 146 238zm-576 411c30-14 73-57 137-158-75 58-122 124-137 158zm398-920c-10 28-10 76-2 132 3-16 5-31 7-44 2-17 5-31 7-43 1-3 2-5 4-8-1-1-1-3-2-5-1-18-7-29-13-36 0 2-1 3-1 4zm-124 661c88-35 186-63 284-81-10-8-20-15-29-23-49-43-93-103-127-176-19 61-47 126-83 197-15 28-30 56-45 83zm646-16c-5-5-31-24-140-24 49 18 94 28 124 28 9 0 14 0 18-1 0-1-1-2-2-3z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		.fa-file-word {
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M1468 380c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H128v1536h1280zM233 768v107h70l164 661h159l128-485c5-15 8-30 10-46 1-8 2-16 2-24h4l3 24c3 14 4 30 9 46l128 485h159l164-661h70V768h-300v107h90l-99 438c-4 16-6 33-7 46l-2 21h-4c0-6-2-14-3-21-3-13-5-30-9-46L825 768H711l-144 545c-4 16-5 33-8 46l-4 21h-4l-2-21c-1-13-3-30-7-46l-99-438h90V768H233z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		.fa-file-powerpoint {
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M1468 380c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H128v1536h1280zm-992-234v106h327v-106h-93v-167h137c43 0 82-2 118-15 90-31 146-124 146-233s-54-193-137-228c-38-15-84-19-130-19H416v107h92v555h-92zm353-280H650V882h120c35 0 62 6 83 18 36 21 56 62 56 115 0 56-20 99-62 120-21 10-47 15-78 15z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		.fa-file-excel {
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M1468 380c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H128v1536h1280zm-979-234v106h281v-106h-75l103-161c12-19 18-34 21-34h2c1 4 3 7 5 10 4 8 10 14 17 24l107 161h-76v106h291v-106h-68l-192-273 195-282h67V768H828v107h74l-103 159c-12 19-21 34-21 33h-2c-1-4-3-7-5-10-4-7-9-14-17-23L648 875h76V768H434v107h68l189 272-194 283h-68z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		.fa-file-audio {
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M1468 380c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H128v1536h1280zM620 850c12 5 20 17 20 30v544c0 13-8 25-20 30-4 1-8 2-12 2-8 0-16-3-23-9l-166-167H288c-18 0-32-14-32-32v-192c0-18 14-32 32-32h131l166-167c10-9 23-12 35-7zm417 689c19 0 37-8 50-24 83-102 129-231 129-363s-46-261-129-363c-22-28-63-32-90-10-28 23-32 63-9 91 65 80 100 178 100 282s-35 202-100 282c-23 28-19 68 9 90 12 10 26 15 40 15zm-211-148c17 0 34-7 47-20 56-60 87-137 87-219s-31-159-87-219c-24-26-65-27-91-3-25 24-27 65-2 91 33 36 52 82 52 131s-19 95-52 131c-25 26-23 67 2 91 13 11 29 17 44 17z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		.fa-file-video {
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M1468 380c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H128v1536h1280zM768 768c70 0 128 58 128 128v384c0 70-58 128-128 128H384c-70 0-128-58-128-128V896c0-70 58-128 128-128h384zm492 2c12 5 20 17 20 30v576c0 13-8 25-20 30-4 1-8 2-12 2-8 0-17-3-23-9l-265-266v-90l265-266c6-6 15-9 23-9 4 0 8 1 12 2z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		.fa-file-archive {
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M640 384V256H512v128h128zm128 128V384H640v128h128zM640 640V512H512v128h128zm128 128V640H640v128h128zm700-388c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H768v128H640V128H128v1536h1280zM781 943c85 287 107 349 107 349 5 17 8 34 8 52 0 111-108 192-256 192s-256-81-256-192c0-18 3-35 8-52 0 0 21-62 120-396V768h128v128h79c29 0 54 19 62 47zm-141 465c71 0 128-29 128-64s-57-64-128-64-128 29-128 64 57 64 128 64z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		.fa-file-code {
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M1468 380c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H128v1536h1280zM480 768c11-14 31-17 45-6l51 38c14 11 17 31 6 45l-182 243 182 243c11 14 8 34-6 45l-51 38c-14 11-34 8-45-6l-226-301c-8-11-8-27 0-38zm802 301c8 11 8 27 0 38l-226 301c-11 14-31 17-45 6l-51-38c-14-11-17-31-6-45l182-243-182-243c-11-14-8-34 6-45l51-38c14-11 34-8 45 6zm-620 461c-18-3-29-20-26-37l138-831c3-18 20-29 37-26l63 10c18 3 29 20 26 37l-138 831c-3 18-20 29-37 26z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		.fa-file-alt, .fa-file-csv {
+      /* fork-awesome doesn't have csv so we use the text icon */
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M1468 380c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H128v1536h1280zM384 800c0-18 14-32 32-32h704c18 0 32 14 32 32v64c0 18-14 32-32 32H416c-18 0-32-14-32-32v-64zm736 224c18 0 32 14 32 32v64c0 18-14 32-32 32H416c-18 0-32-14-32-32v-64c0-18 14-32 32-32h704zm0 256c18 0 32 14 32 32v64c0 18-14 32-32 32H416c-18 0-32-14-32-32v-64c0-18 14-32 32-32h704z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		.fa-file {
+			-webkit-mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1536 1792' xmlns='http://www.w3.org/2000/svg'><path d='M1468 380c37 37 68 111 68 164v1152c0 53-43 96-96 96H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h896c53 0 127 31 164 68zm-444-244v376h376c-6-17-15-34-22-41l-313-313c-7-7-24-16-41-22zm384 1528V640H992c-53 0-96-43-96-96V128H128v1536h1280z'/></svg>");
+      -webkit-mask-repeat: no-repeat;
+		}
+		blockquote {
+			border-left: 4px solid rgb(220, 220, 220);
+			padding-left: 1.2em;
+			margin-left: 0;
+			opacity: .7;
+		}
+
+		.jop-tinymce table,
+		table {
+			text-align: left;
+			border-collapse: collapse;
+			border: 1px solid rgb(220, 220, 220);
+			background-color: #ffffff;
+		}
+
+		.jop-tinymce table td, .jop-tinymce table th,
+		table td, th {
+			text-align: left;
+			padding: .5em 1em .5em 1em;
+			font-size: 15;
+			color: #32373F;
+			font-family: 'Avenir', 'Arial', sans-serif;
+		}
+
+		.jop-tinymce table td,
+		table td {
+			border: 1px solid rgb(220, 220, 220);
+		}
+
+		.jop-tinymce table th,
+		table th {
+			border: 1px solid rgb(220, 220, 220);
+			border-bottom: 2px solid rgb(220, 220, 220);
+			background-color: rgb(247, 247, 247);
+		}
+
+		.jop-tinymce table tr:nth-child(even),
+		table tr:nth-child(even) {
+			background-color: rgb(247, 247, 247);
+		}
+
+		.jop-tinymce table tr:hover,
+		table tr:hover {
+			background-color: #e5e5e5;
+		}
+
+		hr {
+			border: none;
+			border-bottom: 2px solid #dddddd;
+		}
+		img {
+			max-width: 100%;
+			height: auto;
+		}
+		
+		.inline-code,
+		.mce-content-body code {
+			border: 1px solid rgb(220, 220, 220);
+			background-color: rgb(243, 243, 243);
+			padding-right: .2em;
+			padding-left: .2em;
+			border-radius: .25em;
+			color: rgb(0,0,0);
+			font-size: .9em;
+		}
+
+		.highlighted-keyword {
+			background-color: #F3B717;
+			color: black;
+		}
+
+		.not-loaded-resource img {
+			width: 1.15em;
+			height: 1.15em;
+			background: white;
+			padding: 2px !important;
+			border-radius: 2px;
+			box-shadow: 0 1px 3px #000000aa;
+		}
+
+		a.not-loaded-resource img {
+			margin-right: .2em;
+		}
+
+		a.not-loaded-resource {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+		}
+
+		.md-checkbox input[type=checkbox]:checked {
+			opacity: 0.7;
+		}
+
+		.jop-tinymce ul.joplin-checklist .checked,
+		.md-checkbox .checkbox-label-checked {
+			opacity: 0.5;
+		}
+
+		.exported-note {
+			padding: 1em;
+		}
+
+		.joplin-editable .joplin-source {
+			display: none;
+		}
+
+		mark {
+			background: #F7D26E;
+			color: black;
+		}
+
+		/* =============================================== */
+		/* For TinyMCE */
+		/* =============================================== */
+
+		.mce-content-body {
+			/* Note: we give a bit more padding at the bottom, to allow scrolling past the end of the document */
+			padding: 5px 10px 10em 0;
+		}
+
+		/*
+		.mce-content-body code {
+			background-color: transparent;
+		}
+		*/
+
+		.mce-content-body [data-mce-selected=inline-boundary] {
+			background-color: transparent;
+		}
+
+		.mce-content-body .joplin-editable {
+			cursor: pointer !important;
+		}
+
+		.mce-content-body.mce-content-readonly {
+			opacity: 0.5;
+		}
+
+		/* We need that to make sure click events have the A has a target */
+		.katex a span {
+			pointer-events: none;
+		}
+
+		.media-player {
+			width: 100%;
+			margin-top: 10px;
+		}
+
+		.media-player.media-pdf {
+			min-height: 100vh;
+		}
+
+		/* Clear the CODE style if the element is within a joplin-editable block */
+		.mce-content-body .joplin-editable code {
+			border: none;
+			background: none;
+			padding: 0;
+			color: inherit;
+			font-size: inherit;
+		}
+
+		/* =============================================== */
+		/* For TinyMCE */
+		/* =============================================== */
+
+		@media print {
+			body {
+				height: auto !important;
+			}
+
+			pre {
+				white-space: pre-wrap;
+			}
+
+			.code, .inline-code {
+				border: 1px solid #CBCBCB;
+			}
+
+			#joplin-container-content {
+				/* The height of the content is set dynamically by JavaScript (in updateBodyHeight) to go
+				   around various issues related to scrolling. However when printing we don't want this
+				   fixed size as that would crop the content. So we set it to auto here. "important" is
+				   needed to override the style set by JavaScript at the element-level. */
+				height: auto !important;
+			}
+		}
+	
+
+				/*
+					FOR THE MARKDOWN EDITOR
+				*/
+
+				/* Remove the indentation from the checkboxes at the root of the document
+				   (otherwise they are too far right), but keep it for their children to allow
+				   nested lists. Make sure this value matches the UL margin. */
+
+				li.md-checkbox {
+					list-style-type: none;
+				}
+
+				li.md-checkbox input[type=checkbox] {
+					margin-left: -1.71em;
+					margin-right: 0.7em;
+				}
+				
+				ul.joplin-checklist {
+					list-style:none;
+				}
+
+				/*
+					FOR THE RICH TEXT EDITOR
+				*/
+
+				ul.joplin-checklist li::before {
+					content:"\f14a";
+					font-family:"Font Awesome 5 Free";
+					background-size: 16px 16px;
+					pointer-events: all;
+					cursor: pointer;
+					width: 1em;
+					height: 1em;
+					margin-left: -1.3em;
+					position: absolute;
+					color: #32373F;
+				}
+
+				.joplin-checklist li:not(.checked)::before {
+					content:"\f0c8";
+				}
+.mermaid { background-color: white; width: 640px; }</style><div id="rendered-md"><h1 id="311-problem-setup">3.1.1 Problem Setup</h1>
+<p>离散、线性、时间变化的方程</p>
+<h1 id="312-todo">3.1.2 TODO</h1>
+<h1 id="313-bayesian-inference">3.1.3 Bayesian Inference</h1>
+<p>3.1.2的部分，为了最大化后验，直接不断的简化，最后偷懒成了只求最大化先验 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">p(x|v)</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mi mathvariant="normal">∣</mi><mi>v</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(x|v)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mclose">)</span></span></span></span></span> 和似然 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">p(y|x)</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>y</mi><mi mathvariant="normal">∣</mi><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(y|x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mord">∣</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span></span> 的部分，甚至还带入了 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">ln</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">ln</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">n</span></span></span></span></span> 函数来优化求解，最后得到了最优的后验估计 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\hat{\mathbf{x}}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi mathvariant="bold">x</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{\mathbf{x}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.70788em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.70788em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathbf">x</span></span><span style="top:-3.01344em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.22222em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span></span> .</p>
+<p>本节将会强行从贝叶斯公式的角度求解最优估计。</p>
+<h2 id="方差的公式">方差的公式.</h2>
+<p>首先复习用到的一些方差公式，已经熟练掌握的可以跳过不看。通常用 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">D(x)</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">D(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span></span> 表示方差</p>
+<p>1、设 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">c</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal">c</span></span></span></span></span> 为常数， 则 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">D(c)=0</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>c</mi><mo stretchy="false">)</mo><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">D(c)=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord mathnormal">c</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0</span></span></span></span></span><br>
+2、<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">D(c\mathbf{x}) = c^2D(\mathbf{x})</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>c</mi><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>c</mi><mn>2</mn></msup><mi>D</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">D(c\mathbf{x}) = c^2D(\mathbf{x})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord mathnormal">c</span><span class="mord mathbf">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord mathbf">x</span><span class="mclose">)</span></span></span></span></span><br>
+3、<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">D(a\mathbf{x}+b\mathbf{y}) = a^2 D(\mathbf{x})  + b^2 D(\mathbf{y}) + 2\mathrm{cov}(\mathbf{x,y})</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="bold">x</mi><mo>+</mo><mi>b</mi><mi mathvariant="bold">y</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>a</mi><mn>2</mn></msup><mi>D</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>+</mo><msup><mi>b</mi><mn>2</mn></msup><mi>D</mi><mo stretchy="false">(</mo><mi mathvariant="bold">y</mi><mo stretchy="false">)</mo><mo>+</mo><mn>2</mn><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">v</mi></mrow><mo stretchy="false">(</mo><mrow><mi mathvariant="bold">x</mi><mo separator="true">,</mo><mi mathvariant="bold">y</mi></mrow><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">D(a\mathbf{x}+b\mathbf{y}) = a^2 D(\mathbf{x})  + b^2 D(\mathbf{y}) + 2\mathrm{cov}(\mathbf{x,y})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord mathbf">x</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">b</span><span class="mord mathbf" style="margin-right:0.01597em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord mathbf">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord mathbf" style="margin-right:0.01597em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mord"><span class="mord mathrm" style="margin-right:0.01389em;">cov</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">y</span></span><span class="mclose">)</span></span></span></span></span><br>
+4、若 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{x,y}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">x</mi><mo separator="true">,</mo><mi mathvariant="bold">y</mi></mrow><annotation encoding="application/x-tex">\mathbf{x,y}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.63888em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">y</span></span></span></span></span></span> 独立，那么 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">D(a\mathbf{x}+b\mathbf{y}) = a^2 D(\mathbf{x})  + b^2 D(\mathbf{y})</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="bold">x</mi><mo>+</mo><mi>b</mi><mi mathvariant="bold">y</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>a</mi><mn>2</mn></msup><mi>D</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>+</mo><msup><mi>b</mi><mn>2</mn></msup><mi>D</mi><mo stretchy="false">(</mo><mi mathvariant="bold">y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">D(a\mathbf{x}+b\mathbf{y}) = a^2 D(\mathbf{x})  + b^2 D(\mathbf{y})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord mathbf">x</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">b</span><span class="mord mathbf" style="margin-right:0.01597em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord mathbf">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord mathbf" style="margin-right:0.01597em;">y</span><span class="mclose">)</span></span></span></span></span><br>
+5、若 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">y=c\mathbf{x}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>c</mi><mi mathvariant="bold">x</mi></mrow><annotation encoding="application/x-tex">y=c\mathbf{x}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathnormal">c</span><span class="mord mathbf">x</span></span></span></span></span> 则 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">cov(x,y) = cD(\mathbf{x})</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mi>o</mi><mi>v</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>=</mo><mi>c</mi><mi>D</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">cov(x,y) = cD(\mathbf{x})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">co</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">cD</span><span class="mopen">(</span><span class="mord mathbf">x</span><span class="mclose">)</span></span></span></span></span><br>
+证明:</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">cov(x,y) = E(xy) - E(x)E(y)  \\
+= E(xcx) - E(x)E(cx) \\
+= cE(x^2)- cE^2(x) \\
+=c (E(x^2)-E^2(x)) \\
+= c D(x)
+</pre><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>c</mi><mi>o</mi><mi>v</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>=</mo><mi>E</mi><mo stretchy="false">(</mo><mi>x</mi><mi>y</mi><mo stretchy="false">)</mo><mo>−</mo><mi>E</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mi>E</mi><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo><mspace linebreak="newline"></mspace><mo>=</mo><mi>E</mi><mo stretchy="false">(</mo><mi>x</mi><mi>c</mi><mi>x</mi><mo stretchy="false">)</mo><mo>−</mo><mi>E</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mi>E</mi><mo stretchy="false">(</mo><mi>c</mi><mi>x</mi><mo stretchy="false">)</mo><mspace linebreak="newline"></mspace><mo>=</mo><mi>c</mi><mi>E</mi><mo stretchy="false">(</mo><msup><mi>x</mi><mn>2</mn></msup><mo stretchy="false">)</mo><mo>−</mo><mi>c</mi><msup><mi>E</mi><mn>2</mn></msup><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mspace linebreak="newline"></mspace><mo>=</mo><mi>c</mi><mo stretchy="false">(</mo><mi>E</mi><mo stretchy="false">(</mo><msup><mi>x</mi><mn>2</mn></msup><mo stretchy="false">)</mo><mo>−</mo><msup><mi>E</mi><mn>2</mn></msup><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mspace linebreak="newline"></mspace><mo>=</mo><mi>c</mi><mi>D</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">cov(x,y) = E(xy) - E(x)E(y)  \\
+= E(xcx) - E(x)E(cx) \\
+= cE(x^2)- cE^2(x) \\
+=c (E(x^2)-E^2(x)) \\
+= c D(x)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">co</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span></span><span class="mspace newline"></span><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mord mathnormal">c</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord mathnormal">c</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span><span class="mspace newline"></span><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.1141079999999999em;vertical-align:-0.25em;"></span><span class="mord mathnormal">c</span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641079999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.1141079999999999em;vertical-align:-0.25em;"></span><span class="mord mathnormal">c</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641079999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span><span class="mspace newline"></span><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.1141079999999999em;vertical-align:-0.25em;"></span><span class="mord mathnormal">c</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641079999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.1141079999999999em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641079999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">))</span></span><span class="mspace newline"></span><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">cD</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span></span></div>
+<p>后面会用到上面的式子。下面的代码是一些用实验验证公式的过程。</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">%%
+%实际方差需要估
+%随机一些x的分布，计算一下，然后合并一下看看.
+N = 1000000; % 样本的数量
+x =[3 5]';
+C=[1 0
+   1 3]
+y=C*x;
+
+xx = mvnrnd(x, cov_x, N);
+yy = (C*xx')' + mvnrnd([0,0], cov_y, N);
+
+C*cov_x*C'+cov_y %【理论】协方差矩阵右下角部分
+C*cov_x          %【理论】协方差左下角部分
+cov([xx,yy])     %【实际】算出来的协方差</pre><pre class="hljs"><code><span class="hljs-comment">%%</span>
+<span class="hljs-comment">%实际方差需要估</span>
+<span class="hljs-comment">%随机一些x的分布，计算一下，然后合并一下看看.</span>
+N = <span class="hljs-number">1000000</span>; <span class="hljs-comment">% 样本的数量</span>
+x =[<span class="hljs-number">3</span> <span class="hljs-number">5</span>]&#x27;;
+C=[<span class="hljs-number">1</span> <span class="hljs-number">0</span>
+   <span class="hljs-number">1</span> <span class="hljs-number">3</span>]
+y=C*x;
+
+xx = mvnrnd(x, cov_x, N);
+yy = (C*xx&#x27;)&#x27; + mvnrnd([<span class="hljs-number">0</span>,<span class="hljs-number">0</span>], cov_y, N);
+
+C*cov_x*C&#x27;+cov_y <span class="hljs-comment">%【理论】协方差矩阵右下角部分</span>
+C*cov_x          <span class="hljs-comment">%【理论】协方差左下角部分</span>
+cov([xx,yy])     <span class="hljs-comment">%【实际】算出来的协方差</span></code></pre></div>
+<h2 id="例子">例子</h2>
+<p>我们有一个例子，我们有一辆车，起点在 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">(0,0)</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span></span> , 他在 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">t</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord mathnormal">t</span></span></span></span></span> 时刻的真值是</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">\begin{pmatrix}
+1  &amp; 0.3 \\
+    0.7 &amp;0.5
+\end{pmatrix}
+
+
+\begin{pmatrix}
+sin\ t   \\
+ 10t 
+ \end{pmatrix}
+</pre><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mo fence="true">(</mo><mtable rowspacing="0.1600em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.3</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.7</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.5</mn></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow><mrow><mo fence="true">(</mo><mtable rowspacing="0.1600em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>s</mi><mi>i</mi><mi>n</mi><mtext> </mtext><mi>t</mi></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mn>10</mn><mi>t</mi></mrow></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{pmatrix}
+1  &amp; 0.3 \\
+    0.7 &amp;0.5
+\end{pmatrix}
+
+
+\begin{pmatrix}
+sin\ t   \\
+ 10t 
+ \end{pmatrix}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.40003em;vertical-align:-0.95003em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.7</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.3</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.5</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="mord mathnormal">in</span><span class="mspace"> </span><span class="mord mathnormal">t</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">10</span><span class="mord mathnormal">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span></span></span></span></div>
+<p>之所以这么设置，是为了让模型非线性，且曲线奇怪点(不然就只是正弦函数就很没意思)。</p>
+<p>假设起点的方差是:</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">\check{P}_0=\begin{pmatrix}
+0.131696158563955      &amp;  0.0489861322989466 \\
+        0.0489861322989466  &amp;       0.038082413891165
+\end{pmatrix}
+</pre><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mover accent="true"><mi>P</mi><mo>ˇ</mo></mover><mn>0</mn></msub><mo>=</mo><mrow><mo fence="true">(</mo><mtable rowspacing="0.1600em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.131696158563955</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.0489861322989466</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.0489861322989466</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.038082413891165</mn></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">\check{P}_0=\begin{pmatrix}
+0.131696158563955      &amp;  0.0489861322989466 \\
+        0.0489861322989466  &amp;       0.038082413891165
+\end{pmatrix}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0308em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8808em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span><span style="top:-3.25233em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.16666em;"><span class="mord">ˇ</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.40003em;vertical-align:-0.95003em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.131696158563955</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.0489861322989466</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.0489861322989466</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.038082413891165</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span></span></span></span></div>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">p0=[    0.131696158563955        0.0489861322989466
+        0.0489861322989466       0.038082413891165];</pre><pre class="hljs"><code>p0=[    <span class="hljs-number">0.131696158563955</span>        <span class="hljs-number">0.0489861322989466</span>
+        <span class="hljs-number">0.0489861322989466</span>       <span class="hljs-number">0.038082413891165</span>];</code></pre></div>
+<p>那么起点的位置可以用matlb的随机函数得到:</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">x_init = mvnrnd([0,0], p0, 1); % 起点位置</pre><pre class="hljs"><code>x_init = mvnrnd([<span class="hljs-number">0</span>,<span class="hljs-number">0</span>], p0, <span class="hljs-number">1</span>); <span class="hljs-comment">% 起点位置</span></code></pre></div>
+<p>后面的完整真实轨迹的代码如下。<strong>x_gt</strong>就是真实轨迹。我们可以plot出来看</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">x_gt = 10*sin(t);  
+x_gt = [x_gt 10*t];
+ T=[1 0.3
+    0.7 0.5];
+x_gt = (T*x_gt')';
+plot(x_gt(:,1), x_gt(:,2),'-v','color',[0,1,0])</pre><pre class="hljs"><code>x_gt = <span class="hljs-number">10</span>*<span class="hljs-built_in">sin</span>(t);  
+x_gt = [x_gt <span class="hljs-number">10</span>*t];
+ T=[<span class="hljs-number">1</span> <span class="hljs-number">0.3</span>
+    <span class="hljs-number">0.7</span> <span class="hljs-number">0.5</span>];
+x_gt = (T*x_gt&#x27;)&#x27;;
+<span class="hljs-built_in">plot</span>(x_gt(:,<span class="hljs-number">1</span>), x_gt(:,<span class="hljs-number">2</span>),<span class="hljs-string">&#x27;-v&#x27;</span>,<span class="hljs-string">&#x27;color&#x27;</span>,[<span class="hljs-number">0</span>,<span class="hljs-number">1</span>,<span class="hljs-number">0</span>])</code></pre></div>
+<p><img src="_resources/0183695a633f47609e36b2685388cbcf.png" alt="390e03cda26eeaf3b7bb055014309b4f.png"><br>
+是一个很有意思的图形。</p>
+<p>考虑书上的(3.17)，在我们的模型中，所有的<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{A}_k</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">A</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{A}_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83611em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>都是单位矩阵(维持上一个时刻的状态，然后增加<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{v}_k</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">v</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{v}_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.59444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.01597em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>的距离)。</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">\mathbf{x}=\mathbf{A}_{k-1}\mathbf{x}_{k-1}+\mathbf{v}_k+\mathbf{w}_k  \qquad  (式3.17)
+</pre><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="bold">x</mi><mo>=</mo><msub><mi mathvariant="bold">A</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub><msub><mi mathvariant="bold">x</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi mathvariant="bold">v</mi><mi>k</mi></msub><mo>+</mo><msub><mi mathvariant="bold">w</mi><mi>k</mi></msub><mspace width="2em"/><mo stretchy="false">(</mo><mtext>式</mtext><mn>3.17</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{x}=\mathbf{A}_{k-1}\mathbf{x}_{k-1}+\mathbf{v}_k+\mathbf{w}_k  \qquad  (式3.17)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf">x</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.894441em;vertical-align:-0.208331em;"></span><span class="mord"><span class="mord mathbf">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.73333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.01597em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.01597em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:2em;"></span><span class="mopen">(</span><span class="mord cjk_fallback">式</span><span class="mord">3.17</span><span class="mclose">)</span></span></span></span></span></div>
+<p><span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{v}_k</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">v</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{v}_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.59444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.01597em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>的获取可以借用真值，两个时刻的<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{x}_{t+1}-\mathbf{x}_{t}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">x</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi mathvariant="bold">x</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{x}_{t+1}-\mathbf{x}_{t}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.791661em;vertical-align:-0.208331em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.301108em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.59444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>作为<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{v}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">v</mi></mrow><annotation encoding="application/x-tex">\mathbf{v}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">v</span></span></span></span></span> . 当然，直接用真值不太好，我们可以用  <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">4(\mathbf{x}_{t+0.25}-\mathbf{x}_{t})</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn><mo stretchy="false">(</mo><msub><mi mathvariant="bold">x</mi><mrow><mi>t</mi><mo>+</mo><mn>0.25</mn></mrow></msub><mo>−</mo><msub><mi mathvariant="bold">x</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">4(\mathbf{x}_{t+0.25}-\mathbf{x}_{t})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">4</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.301108em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">0.25</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span> 代替。 注意在本节中，要把本身是2维向量的<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{v}_k</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">v</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{v}_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.59444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.01597em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span> 拼成一整个200维的<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{v}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">v</mi></mrow><annotation encoding="application/x-tex">\mathbf{v}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">v</span></span></span></span></span>. (100个二维，拼在一起就是200维)。 后文中，<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{v}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">v</mi></mrow><annotation encoding="application/x-tex">\mathbf{v}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">v</span></span></span></span></span> 表示的就是200维向量，不再是二维。这和书上的公式(3.18)统一。<br>
+公式(3.18)</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">\mathbf{x=A(v+w)} \qquad  (式3.18)
+</pre><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mi mathvariant="bold">x</mi><mo>=</mo><mi mathvariant="bold">A</mi><mo stretchy="false">(</mo><mi mathvariant="bold">v</mi><mo>+</mo><mi mathvariant="bold">w</mi><mo stretchy="false">)</mo></mrow><mspace width="2em"/><mo stretchy="false">(</mo><mtext>式</mtext><mn>3.18</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{x=A(v+w)} \qquad  (式3.18)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord mathbf">A</span><span class="mopen">(</span><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">w</span><span class="mclose">)</span></span><span class="mspace" style="margin-right:2em;"></span><span class="mopen">(</span><span class="mord cjk_fallback">式</span><span class="mord">3.18</span><span class="mclose">)</span></span></span></span></span></div>
+<p>其中<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{w}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">w</mi></mrow><annotation encoding="application/x-tex">\mathbf{w}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">w</span></span></span></span></span>是噪音,</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">v=zeros(200,1);
+for i = 1 : 99
+    tmp = x_gt(i+1,:) - x_gt(i,:)  %输入信号v没有方差
+    
+    t=((i-0.75)/10);
+    xx=[10*sin(t)
+        10*t]';
+    xx = (T*xx')';
+
+    tmp = (xx- x_gt(i,:))*4;
+    v(2*i+1) = tmp(1);
+    v(2*i+2) = tmp(2);
+end
+v(1) = x_init(1);
+v(2) = x_init(2);</pre><pre class="hljs"><code>v=<span class="hljs-built_in">zeros</span>(<span class="hljs-number">200</span>,<span class="hljs-number">1</span>);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span> : <span class="hljs-number">99</span>
+    tmp = x_gt(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>,:) - x_gt(<span class="hljs-built_in">i</span>,:)  <span class="hljs-comment">%输入信号v没有方差</span>
+    
+    t=((<span class="hljs-built_in">i</span><span class="hljs-number">-0.75</span>)/<span class="hljs-number">10</span>);
+    xx=[<span class="hljs-number">10</span>*<span class="hljs-built_in">sin</span>(t)
+        <span class="hljs-number">10</span>*t]&#x27;;
+    xx = (T*xx&#x27;)&#x27;;
+
+    tmp = (xx- x_gt(<span class="hljs-built_in">i</span>,:))*<span class="hljs-number">4</span>;
+    v(<span class="hljs-number">2</span>*<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>) = tmp(<span class="hljs-number">1</span>);
+    v(<span class="hljs-number">2</span>*<span class="hljs-built_in">i</span>+<span class="hljs-number">2</span>) = tmp(<span class="hljs-number">2</span>);
+<span class="hljs-keyword">end</span>
+v(<span class="hljs-number">1</span>) = x_init(<span class="hljs-number">1</span>);
+v(<span class="hljs-number">2</span>) = x_init(<span class="hljs-number">2</span>);</code></pre></div>
+<p>随后根据(3.19)构造<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{A}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">A</mi></mrow><annotation encoding="application/x-tex">\mathbf{A}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68611em;vertical-align:0em;"></span><span class="mord mathbf">A</span></span></span></span></span>矩阵。代码如下</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">A=tril(ones(200,200));
+for i = 1 : 200
+    for j = 1 : 200
+        if xor(mod(i,2), mod(j,2)) == 1
+            A(i,j)=0;
+        end
+    end
+end</pre><pre class="hljs"><code>A=<span class="hljs-built_in">tril</span>(<span class="hljs-built_in">ones</span>(<span class="hljs-number">200</span>,<span class="hljs-number">200</span>));
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span> : <span class="hljs-number">200</span>
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span> = <span class="hljs-number">1</span> : <span class="hljs-number">200</span>
+        <span class="hljs-keyword">if</span> xor(<span class="hljs-built_in">mod</span>(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>), <span class="hljs-built_in">mod</span>(<span class="hljs-built_in">j</span>,<span class="hljs-number">2</span>)) == <span class="hljs-number">1</span>
+            A(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>)=<span class="hljs-number">0</span>;
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre></div>
+<p>根据式(3.20)我们可以得到<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{x}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">x</mi></mrow><annotation encoding="application/x-tex">\mathbf{x}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf">x</span></span></span></span></span>的先验<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\check{\mathbf{x}}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi mathvariant="bold">x</mi><mo>ˇ</mo></mover></mrow><annotation encoding="application/x-tex">\check{\mathbf{x}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64191em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.64191em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathbf">x</span></span><span style="top:-3.01344em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.22222em;"><span class="mord">ˇ</span></span></span></span></span></span></span></span></span></span></span></p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">x_check=A*v</pre><pre class="hljs"><code>x_check=A*v</code></pre></div>
+<p>根据式(3.21)我们得到<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{Q}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">Q</mi></mrow><annotation encoding="application/x-tex">\mathbf{Q}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8805499999999999em;vertical-align:-0.19444em;"></span><span class="mord mathbf">Q</span></span></span></span></span> 和 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{\check{P}}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi mathvariant="bold">P</mi><mo>ˇ</mo></mover></mrow><annotation encoding="application/x-tex">\mathbf{\check{P}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8870499999999999em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8870499999999999em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathbf">P</span></span><span style="top:-3.25511em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.2875em;"><span class="mord mathbf">ˇ</span></span></span></span></span></span></span></span></span></span></span>，其中<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{Q}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">Q</mi></mrow><annotation encoding="application/x-tex">\mathbf{Q}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8805499999999999em;vertical-align:-0.19444em;"></span><span class="mord mathbf">Q</span></span></span></span></span>是每个估算状态的方差，也就是process model的processs noise. (3.18的<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{w}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">w</mi></mrow><annotation encoding="application/x-tex">\mathbf{w}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">w</span></span></span></span></span>带来的方差)。 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{Q}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">Q</mi></mrow><annotation encoding="application/x-tex">\mathbf{Q}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8805499999999999em;vertical-align:-0.19444em;"></span><span class="mord mathbf">Q</span></span></span></span></span>还包含<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\check{P}_0</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>P</mi><mo>ˇ</mo></mover><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">\check{P}_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0308em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8808em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span><span style="top:-3.25233em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.16666em;"><span class="mord">ˇ</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>作为左上角第一个元素。<br>
+我们假设所有的<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{Q}_k</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">Q</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{Q}_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8805499999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathbf">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span> 都相等，都是</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">\mathbf{Q}_k = 
+\begin{pmatrix}
+0.229343002339173      &amp;   0.265716902218622 \\
+         0.265716902218622  &amp;       0.309181125798839
+\end{pmatrix}
+</pre><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi mathvariant="bold">Q</mi><mi>k</mi></msub><mo>=</mo><mrow><mo fence="true">(</mo><mtable rowspacing="0.1600em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.229343002339173</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.265716902218622</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.265716902218622</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.309181125798839</mn></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbf{Q}_k = 
+\begin{pmatrix}
+0.229343002339173      &amp;   0.265716902218622 \\
+         0.265716902218622  &amp;       0.309181125798839
+\end{pmatrix}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8805499999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathbf">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.40003em;vertical-align:-0.95003em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.229343002339173</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.265716902218622</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.265716902218622</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0.309181125798839</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span></span></span></span></div>
+<p>那么根据(3.21)</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">\check{\mathbf{P}}=\mathbf{AQA}^\mathrm{T}\qquad  (式3.21)
+</pre><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mover accent="true"><mi mathvariant="bold">P</mi><mo>ˇ</mo></mover><mo>=</mo><msup><mrow><mi mathvariant="bold">A</mi><mi mathvariant="bold">Q</mi><mi mathvariant="bold">A</mi></mrow><mi mathvariant="normal">T</mi></msup><mspace width="2em"/><mo stretchy="false">(</mo><mtext>式</mtext><mn>3.21</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\check{\mathbf{P}}=\mathbf{AQA}^\mathrm{T}\qquad  (式3.21)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.88358em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.88358em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathbf">P</span></span><span style="top:-3.25511em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.16666em;"><span class="mord">ˇ</span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.167341em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord"><span class="mord mathbf">AQA</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.917341em;"><span style="top:-3.1390100000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathrm mtight">T</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:2em;"></span><span class="mopen">(</span><span class="mord cjk_fallback">式</span><span class="mord">3.21</span><span class="mclose">)</span></span></span></span></span></div>
+<p>得到如下代码</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">%预估方差 process noise
+Qk = [0.229343002339173         0.265716902218622
+         0.265716902218622         0.309181125798839];
+%观测方差 measurement noise
+Rk = [0.113178900124737        0.0433648339106839
+        0.0433648339106839        0.0999370559197836];
+Q=zeros(200,200);
+for i = 1 : 100
+    for o = 1 : 2
+        for p = 1 : 2
+            nx = 2 * i - 1 + o - 1;
+            ny = 2 * i - 1 + p - 1;
+            Q(nx,ny) = Qk(o,p);
+            R(nx,ny) = Rk(o,p);
+        end
+    end
+end
+for o = 1 : 2
+    for p = 1 : 2
+        Q(o,p) = p0(o,p);
+        R(o,p) = Rk(o,p);
+    end
+end
+P_check = A*Q*A';</pre><pre class="hljs"><code><span class="hljs-comment">%预估方差 process noise</span>
+Qk = [<span class="hljs-number">0.229343002339173</span>         <span class="hljs-number">0.265716902218622</span>
+         <span class="hljs-number">0.265716902218622</span>         <span class="hljs-number">0.309181125798839</span>];
+<span class="hljs-comment">%观测方差 measurement noise</span>
+Rk = [<span class="hljs-number">0.113178900124737</span>        <span class="hljs-number">0.0433648339106839</span>
+        <span class="hljs-number">0.0433648339106839</span>        <span class="hljs-number">0.0999370559197836</span>];
+Q=<span class="hljs-built_in">zeros</span>(<span class="hljs-number">200</span>,<span class="hljs-number">200</span>);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span> : <span class="hljs-number">100</span>
+    <span class="hljs-keyword">for</span> o = <span class="hljs-number">1</span> : <span class="hljs-number">2</span>
+        <span class="hljs-keyword">for</span> p = <span class="hljs-number">1</span> : <span class="hljs-number">2</span>
+            nx = <span class="hljs-number">2</span> * <span class="hljs-built_in">i</span> - <span class="hljs-number">1</span> + o - <span class="hljs-number">1</span>;
+            ny = <span class="hljs-number">2</span> * <span class="hljs-built_in">i</span> - <span class="hljs-number">1</span> + p - <span class="hljs-number">1</span>;
+            Q(nx,ny) = Qk(o,p);
+            R(nx,ny) = Rk(o,p);
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-keyword">for</span> o = <span class="hljs-number">1</span> : <span class="hljs-number">2</span>
+    <span class="hljs-keyword">for</span> p = <span class="hljs-number">1</span> : <span class="hljs-number">2</span>
+        Q(o,p) = p0(o,p);
+        R(o,p) = Rk(o,p);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+P_check = A*Q*A&#x27;;</code></pre></div>
+<p>上面代码里出现的<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{R}_k</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">R</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{R}_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83611em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>是观测模型里的方差，下面讲解观测模型，根据书上(3.23)<br>
+和(3.24)的公式，我们需要构建<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{C}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">C</mi></mrow><annotation encoding="application/x-tex">\mathbf{C}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68611em;vertical-align:0em;"></span><span class="mord mathbf">C</span></span></span></span></span>。 是我们每一个小<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{C}_k</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">C</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{C}_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83611em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>都是单位矩阵，那么大<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{C}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">C</mi></mrow><annotation encoding="application/x-tex">\mathbf{C}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68611em;vertical-align:0em;"></span><span class="mord mathbf">C</span></span></span></span></span>肯定也是单位矩阵。根据句式(3.25)得到如下代码</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">C=eye(200,200);          %每个小c都是单位矩阵，拼在一起还是单位矩阵</pre><pre class="hljs"><code>C=<span class="hljs-built_in">eye</span>(<span class="hljs-number">200</span>,<span class="hljs-number">200</span>);          <span class="hljs-comment">%每个小c都是单位矩阵，拼在一起还是单位矩阵</span></code></pre></div>
+<p>然后根据(3.24)得到</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="" data-joplin-source-open="```&#10;" data-joplin-source-close="&#10;```">N = 101; %100组数据
+y_measure = x_gt + mvnrnd([0,0], Rk, N); %观测是有方差的
+y=zeros(200,1) % y是构建符合要求的向量
+for i = 1: 100
+    y(i*2-1) = y_measure(i,1);
+    y(i*2) = y_measure(i,2);
+end
+plot(y_measure(:,1), y_measure(:,2),'-*','color',[1,0,0])</pre><pre class="hljs"><code>N = <span class="hljs-number">101</span>; %<span class="hljs-number">100</span>组数据
+y_measure = x_gt + mvnrnd([<span class="hljs-number">0</span>,<span class="hljs-number">0</span>], Rk, N); %观测是有方差的
+y=zeros(<span class="hljs-number">200</span>,<span class="hljs-number">1</span>) % y是构建符合要求的向量
+<span class="hljs-keyword">for</span> i = <span class="hljs-number">1</span>: <span class="hljs-number">100</span>
+    y(i*<span class="hljs-number">2</span><span class="hljs-number">-1</span>) = y_measure(i,<span class="hljs-number">1</span>);
+    y(i*<span class="hljs-number">2</span>) = y_measure(i,<span class="hljs-number">2</span>);
+end
+plot(y_measure(:,<span class="hljs-number">1</span>), y_measure(:,<span class="hljs-number">2</span>),<span class="hljs-string">&#x27;-*&#x27;</span>,<span class="hljs-string">&#x27;color&#x27;</span>,[<span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>])</code></pre></div>
+<p>得到的观测结果和原始轨迹的对比如下图所示<br>
+<img src="_resources/7f78ba2db00c4f299280090591a91471.png" alt="32d4d3c1899ead78f7c33be4a39c7b1a.png"><br>
+放大一个细节(下图)可以看出，观测并不是平滑的，噪声影响很大。<br>
+<img src="_resources/23a5fc16316b4d769f25f576149c3855.png" alt="34b86d8049efe88b00bb878cdf412c8d.png"></p>
+<p>在这里，我们可以把(3.20)的结果也拿出来对比，如下图所示<br>
+<img src="_resources/56c1703ca97c49e1b8550df94afd4920.png" alt="6b2d75b890bbc6968e49cb0a3a1d171f.png"></p>
+<p>可以看出，推算的先验会有累计误差。</p>
+<p>书上的(3.26)的公式，实际上是只给出 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{v}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">v</mi></mrow><annotation encoding="application/x-tex">\mathbf{v}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">v</span></span></span></span></span> ,推算出<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{x}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">x</mi></mrow><annotation encoding="application/x-tex">\mathbf{x}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf">x</span></span></span></span></span> 和 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{y}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">y</mi></mrow><annotation encoding="application/x-tex">\mathbf{y}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.63888em;vertical-align:-0.19444em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">y</span></span></span></span></span>的分布和方差。这里一般来说，观测和状态是相等的(我们给的<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{C}_k</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="bold">C</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{C}_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83611em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>矩阵都是单位举证)。但是不相等也可以，比如黑白胶卷相机，把3D世界映射到2D世界。但是我们已经没办法重新映射回3D的世界了(不考虑rgbd,双目等黑科技，只是简单的说明。)</p>
+<p>这里还是要简单说明以下自己对(3.26)的理解(希望dalao能给出点评)</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">p(x,y|v)
+</pre><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mi mathvariant="normal">∣</mi><mi>v</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(x,y|v)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mclose">)</span></span></span></span></span></div>
+<p>是纯粹的用控制量(实际上还需要一个初始状态) 估算出后面的状态，和观测，给出均值和方差。</p>
+<p>随后根据贝叶斯公式，改写为式(3.27)</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">p(\mathbf{x,y|v}) =p(\mathbf{x|v,y}) p(\mathbf{y|v}) \qquad (式3.27)
+</pre><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><mrow><mi mathvariant="bold">x</mi><mo separator="true">,</mo><mi mathvariant="bold">y</mi><mi mathvariant="bold">∣</mi><mi mathvariant="bold">v</mi></mrow><mo stretchy="false">)</mo><mo>=</mo><mi>p</mi><mo stretchy="false">(</mo><mrow><mi mathvariant="bold">x</mi><mi mathvariant="bold">∣</mi><mi mathvariant="bold">v</mi><mo separator="true">,</mo><mi mathvariant="bold">y</mi></mrow><mo stretchy="false">)</mo><mi>p</mi><mo stretchy="false">(</mo><mrow><mi mathvariant="bold">y</mi><mi mathvariant="bold">∣</mi><mi mathvariant="bold">v</mi></mrow><mo stretchy="false">)</mo><mspace width="2em"/><mo stretchy="false">(</mo><mtext>式</mtext><mn>3.27</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(\mathbf{x,y|v}) =p(\mathbf{x|v,y}) p(\mathbf{y|v}) \qquad (式3.27)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">y∣v</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">x∣v</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">y</span></span><span class="mclose">)</span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">y∣v</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:2em;"></span><span class="mopen">(</span><span class="mord cjk_fallback">式</span><span class="mord">3.27</span><span class="mclose">)</span></span></span></span></span></div>
+<p>发现这里的 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">p(\mathbf{x|v,y})</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><mrow><mi mathvariant="bold">x</mi><mi mathvariant="bold">∣</mi><mi mathvariant="bold">v</mi><mo separator="true">,</mo><mi mathvariant="bold">y</mi></mrow><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(\mathbf{x|v,y})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">x∣v</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">y</span></span><span class="mclose">)</span></span></span></span></span> 是我们要求的！正好是给出观测和控制量，求实际状态的分布！我们例子不就是给了车的速度和一些观测，求车的实际位置吗？<br>
+后面那个 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">p(\mathbf{y|v})</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><mrow><mi mathvariant="bold">y</mi><mi mathvariant="bold">∣</mi><mi mathvariant="bold">v</mi></mrow><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(\mathbf{y|v})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">y∣v</span></span><span class="mclose">)</span></span></span></span></span> 对我们而言也能求的出来，在当前的例子中，<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{y}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">y</mi></mrow><annotation encoding="application/x-tex">\mathbf{y}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.63888em;vertical-align:-0.19444em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">y</span></span></span></span></span> 就是观测，也就是车的位置<span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">\mathbf{x}</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">x</mi></mrow><annotation encoding="application/x-tex">\mathbf{x}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf">x</span></span></span></span></span>，我们可以用前面的(3.24)求的出来。</p>
+<p>可以结合上一章的(2.53)的公式得到 <span class="joplin-editable"><span class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$" data-joplin-source-close="$">p(\mathbf{x|v,y})</span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><mrow><mi mathvariant="bold">x</mi><mi mathvariant="bold">∣</mi><mi mathvariant="bold">v</mi><mo separator="true">,</mo><mi mathvariant="bold">y</mi></mrow><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(\mathbf{x|v,y})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">x∣v</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">y</span></span><span class="mclose">)</span></span></span></span></span> 的表达(3.29)。实际上工作已经算完成了99%。<br>
+这里我们用matlab代码带入书上(3.29)得到</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">x_hat=x_check + P_check*C'*(C*P_check*C' + R)^-1 * (y-C*x_check)
+for i = 1 : 200
+    if mod( i,2) == 0
+        x_hat_y(i/2) = x_hat(i);
+    else
+        x_hat_x((i+1)/2) = x_hat(i);
+    end
+end
+plot(x_hat_x,x_hat_y,'-O','color',[0,0,0])</pre><pre class="hljs"><code>x_hat=x_check + P_check*C&#x27;*(C*P_check*C&#x27; + R)^<span class="hljs-number">-1</span> * (y-C*x_check)
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span> : <span class="hljs-number">200</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">mod</span>( <span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>) == <span class="hljs-number">0</span>
+        x_hat_y(<span class="hljs-built_in">i</span>/<span class="hljs-number">2</span>) = x_hat(<span class="hljs-built_in">i</span>);
+    <span class="hljs-keyword">else</span>
+        x_hat_x((<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>)/<span class="hljs-number">2</span>) = x_hat(<span class="hljs-built_in">i</span>);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-built_in">plot</span>(x_hat_x,x_hat_y,<span class="hljs-string">&#x27;-O&#x27;</span>,<span class="hljs-string">&#x27;color&#x27;</span>,[<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>])</code></pre></div>
+<p>结果如下图所示<br>
+<img src="_resources/7192810b1d2440feab34794c0f13632f.png" alt="49b5ea6695b1f6ae71f8fe9a6dcac86e.png"><br>
+部分细节如下图<br>
+<img src="_resources/53fc20fe27b348678788eee1315bdf8c.png" alt="fa4658bfd3de4e12fdd36b7674b563c3.png"><br>
+<img src="_resources/bc2e8e17c9fe453ba2a9a4cd0239a651.png" alt="e8eae5580971e2fd777ddd16ee9c05ae.png"><br>
+<img src="_resources/9e57d7280cb041328e96c64055630b07.png" alt="1e6102685f3aae11deeb1ce9125aa456.png"></p>
+<p>从三个细节图可以看出，融合后的结果，既没有全部相信观测，也没有全部相信控制数据，达到了一种'融合'，并且结果和绿色的原始轨迹更接近。</p>
+<p>书上的内容没有到此结束！</p>
+<p>因为上面的矩阵计算过于复杂，希望能简化运算量？后面到底讲了什么？我也没懂，哎。看不懂看不懂，dalao带带我。</p>
+<div class="joplin-editable"><pre class="joplin-source" data-joplin-language="matlab" data-joplin-source-open="```matlab&#10;" data-joplin-source-close="&#10;```">clc
+clear all
+
+p0=[ 0.131696158563955        0.0489861322989466
+        0.0489861322989466         0.038082413891165];      % 起点的协方差
+x_init = mvnrnd([0,0], p0, 1); % 起点位置
+
+%假设车沿着y=10*sin(x)方向走，100个时刻.轨迹
+
+t=[0:0.1:10]';
+
+%随着时间变化的100个真值。
+x_gt = 10*sin(t);  
+x_gt = [x_gt 10*t];
+ T=[1 0.3
+    0.7 0.5];
+x_gt = (T*x_gt')';
+
+
+%% 初始化一些参数
+%预估方差 process noise
+Qk = [0.229343002339173         0.265716902218622
+         0.265716902218622         0.309181125798839];
+     
+%观测方差 measurement noise
+Rk = [0.113178900124737        0.0433648339106839
+        0.0433648339106839        0.0999370559197836];
+
+Q=zeros(200,200);
+for i = 1 : 100
+    for o = 1 : 2
+        for p = 1 : 2
+            nx = 2 * i - 1 + o - 1;
+            ny = 2 * i - 1 + p - 1;
+            Q(nx,ny) = Qk(o,p);
+            R(nx,ny) = Rk(o,p);
+        end
+    end
+end
+for o = 1 : 2
+    for p = 1 : 2
+        Q(o,p) = p0(o,p);
+        R(o,p) = Rk(o,p);
+    end
+end
+    
+
+N = 101; %100组数据
+y_measure = x_gt + mvnrnd([0,0], Rk, N); %观测是有方差的
+y=zeros(200,1) % y是构建符合要求的向量
+for i = 1: 100
+    y(i*2-1) = y_measure(i,1);
+    y(i*2) = y_measure(i,2);
+end
+
+
+%构造v，很复杂很累。就是每个时刻的速度向量
+v=zeros(200,1);
+for i = 1 : 99
+    tmp = x_gt(i+1,:) - x_gt(i,:)  %输入信号v没有方差
+    
+    t=((i-0.75)/10);
+    xx=[10*sin(t)
+        10*t]';
+    xx = (T*xx')';
+
+    tmp = (xx- x_gt(i,:))*4;
+    v(2*i+1) = tmp(1);
+    v(2*i+2) = tmp(2);
+end
+v(1) = x_init(1);
+v(2) = x_init(2);
+
+plot(y_measure(:,1), y_measure(:,2),'-*','color',[1,0,0])
+hold on;
+
+%% 显然开始模拟书上代码
+% 显然在这样的模型中，所有的A小矩阵都完全一样，都是单位矩阵，那么整个大A矩阵就是一个下三角都是1的矩阵
+A=tril(ones(200,200));
+for i = 1 : 200
+    for j = 1 : 200
+        if xor(mod(i,2), mod(j,2)) == 1
+            A(i,j)=0;
+        end
+    end
+end
+C=eye(200,200);          %每个小c都是单位矩阵，拼在一起还是单位矩阵
+x_check = A*v;
+
+for i = 1 : 200
+    if mod( i,2) == 0
+        yy(i/2) = x_check(i);
+    else
+        xx((i+1)/2) = x_check(i);
+    end
+end
+plot(xx,yy,'-x','color',[0,0,1])
+hold on
+plot(x_gt(:,1), x_gt(:,2),'-v','color',[0,1,0])
+
+
+P_check = A*Q*A';
+
+
+
+
+%% 协方差(3.28)到(3.29) 协方差部分相等
+a=inv(inv(P_check) + C'*inv(R)*C);
+b=P_check-P_check*C'*inv(C*P_check*C'+R)*C*P_check
+max(max(a-b)') %约等于0，两个式子相等
+
+%% 
+x_hat=x_check + P_check*C'*(C*P_check*C' + R)^-1 * (y-C*x_check)
+for i = 1 : 200
+    if mod( i,2) == 0
+        x_hat_y(i/2) = x_hat(i);
+    else
+        x_hat_x((i+1)/2) = x_hat(i);
+    end
+end
+plot(x_hat_x,x_hat_y,'-O','color',[0,0,0])
+
+legend('观测结果(有噪音)','用输入v估算的先验','原始轨迹','估算的后验轨迹')
+return
+%</pre><pre class="hljs"><code>clc
+clear all
+
+p0=[ <span class="hljs-number">0.131696158563955</span>        <span class="hljs-number">0.0489861322989466</span>
+        <span class="hljs-number">0.0489861322989466</span>         <span class="hljs-number">0.038082413891165</span>];      <span class="hljs-comment">% 起点的协方差</span>
+x_init = mvnrnd([<span class="hljs-number">0</span>,<span class="hljs-number">0</span>], p0, <span class="hljs-number">1</span>); <span class="hljs-comment">% 起点位置</span>
+
+<span class="hljs-comment">%假设车沿着y=10*sin(x)方向走，100个时刻.轨迹</span>
+
+t=[<span class="hljs-number">0</span>:<span class="hljs-number">0.1</span>:<span class="hljs-number">10</span>]&#x27;;
+
+<span class="hljs-comment">%随着时间变化的100个真值。</span>
+x_gt = <span class="hljs-number">10</span>*<span class="hljs-built_in">sin</span>(t);  
+x_gt = [x_gt <span class="hljs-number">10</span>*t];
+ T=[<span class="hljs-number">1</span> <span class="hljs-number">0.3</span>
+    <span class="hljs-number">0.7</span> <span class="hljs-number">0.5</span>];
+x_gt = (T*x_gt&#x27;)&#x27;;
+
+
+<span class="hljs-comment">%% 初始化一些参数</span>
+<span class="hljs-comment">%预估方差 process noise</span>
+Qk = [<span class="hljs-number">0.229343002339173</span>         <span class="hljs-number">0.265716902218622</span>
+         <span class="hljs-number">0.265716902218622</span>         <span class="hljs-number">0.309181125798839</span>];
+     
+<span class="hljs-comment">%观测方差 measurement noise</span>
+Rk = [<span class="hljs-number">0.113178900124737</span>        <span class="hljs-number">0.0433648339106839</span>
+        <span class="hljs-number">0.0433648339106839</span>        <span class="hljs-number">0.0999370559197836</span>];
+
+Q=<span class="hljs-built_in">zeros</span>(<span class="hljs-number">200</span>,<span class="hljs-number">200</span>);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span> : <span class="hljs-number">100</span>
+    <span class="hljs-keyword">for</span> o = <span class="hljs-number">1</span> : <span class="hljs-number">2</span>
+        <span class="hljs-keyword">for</span> p = <span class="hljs-number">1</span> : <span class="hljs-number">2</span>
+            nx = <span class="hljs-number">2</span> * <span class="hljs-built_in">i</span> - <span class="hljs-number">1</span> + o - <span class="hljs-number">1</span>;
+            ny = <span class="hljs-number">2</span> * <span class="hljs-built_in">i</span> - <span class="hljs-number">1</span> + p - <span class="hljs-number">1</span>;
+            Q(nx,ny) = Qk(o,p);
+            R(nx,ny) = Rk(o,p);
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-keyword">for</span> o = <span class="hljs-number">1</span> : <span class="hljs-number">2</span>
+    <span class="hljs-keyword">for</span> p = <span class="hljs-number">1</span> : <span class="hljs-number">2</span>
+        Q(o,p) = p0(o,p);
+        R(o,p) = Rk(o,p);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+    
+
+N = <span class="hljs-number">101</span>; <span class="hljs-comment">%100组数据</span>
+y_measure = x_gt + mvnrnd([<span class="hljs-number">0</span>,<span class="hljs-number">0</span>], Rk, N); <span class="hljs-comment">%观测是有方差的</span>
+y=<span class="hljs-built_in">zeros</span>(<span class="hljs-number">200</span>,<span class="hljs-number">1</span>) <span class="hljs-comment">% y是构建符合要求的向量</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>: <span class="hljs-number">100</span>
+    y(<span class="hljs-built_in">i</span>*<span class="hljs-number">2</span><span class="hljs-number">-1</span>) = y_measure(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>);
+    y(<span class="hljs-built_in">i</span>*<span class="hljs-number">2</span>) = y_measure(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>);
+<span class="hljs-keyword">end</span>
+
+
+<span class="hljs-comment">%构造v，很复杂很累。就是每个时刻的速度向量</span>
+v=<span class="hljs-built_in">zeros</span>(<span class="hljs-number">200</span>,<span class="hljs-number">1</span>);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span> : <span class="hljs-number">99</span>
+    tmp = x_gt(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>,:) - x_gt(<span class="hljs-built_in">i</span>,:)  <span class="hljs-comment">%输入信号v没有方差</span>
+    
+    t=((<span class="hljs-built_in">i</span><span class="hljs-number">-0.75</span>)/<span class="hljs-number">10</span>);
+    xx=[<span class="hljs-number">10</span>*<span class="hljs-built_in">sin</span>(t)
+        <span class="hljs-number">10</span>*t]&#x27;;
+    xx = (T*xx&#x27;)&#x27;;
+
+    tmp = (xx- x_gt(<span class="hljs-built_in">i</span>,:))*<span class="hljs-number">4</span>;
+    v(<span class="hljs-number">2</span>*<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>) = tmp(<span class="hljs-number">1</span>);
+    v(<span class="hljs-number">2</span>*<span class="hljs-built_in">i</span>+<span class="hljs-number">2</span>) = tmp(<span class="hljs-number">2</span>);
+<span class="hljs-keyword">end</span>
+v(<span class="hljs-number">1</span>) = x_init(<span class="hljs-number">1</span>);
+v(<span class="hljs-number">2</span>) = x_init(<span class="hljs-number">2</span>);
+
+<span class="hljs-built_in">plot</span>(y_measure(:,<span class="hljs-number">1</span>), y_measure(:,<span class="hljs-number">2</span>),<span class="hljs-string">&#x27;-*&#x27;</span>,<span class="hljs-string">&#x27;color&#x27;</span>,[<span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>])
+<span class="hljs-built_in">hold</span> on;
+
+<span class="hljs-comment">%% 显然开始模拟书上代码</span>
+<span class="hljs-comment">% 显然在这样的模型中，所有的A小矩阵都完全一样，都是单位矩阵，那么整个大A矩阵就是一个下三角都是1的矩阵</span>
+A=<span class="hljs-built_in">tril</span>(<span class="hljs-built_in">ones</span>(<span class="hljs-number">200</span>,<span class="hljs-number">200</span>));
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span> : <span class="hljs-number">200</span>
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span> = <span class="hljs-number">1</span> : <span class="hljs-number">200</span>
+        <span class="hljs-keyword">if</span> xor(<span class="hljs-built_in">mod</span>(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>), <span class="hljs-built_in">mod</span>(<span class="hljs-built_in">j</span>,<span class="hljs-number">2</span>)) == <span class="hljs-number">1</span>
+            A(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>)=<span class="hljs-number">0</span>;
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+C=<span class="hljs-built_in">eye</span>(<span class="hljs-number">200</span>,<span class="hljs-number">200</span>);          <span class="hljs-comment">%每个小c都是单位矩阵，拼在一起还是单位矩阵</span>
+x_check = A*v;
+
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span> : <span class="hljs-number">200</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">mod</span>( <span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>) == <span class="hljs-number">0</span>
+        yy(<span class="hljs-built_in">i</span>/<span class="hljs-number">2</span>) = x_check(<span class="hljs-built_in">i</span>);
+    <span class="hljs-keyword">else</span>
+        xx((<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>)/<span class="hljs-number">2</span>) = x_check(<span class="hljs-built_in">i</span>);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-built_in">plot</span>(xx,yy,<span class="hljs-string">&#x27;-x&#x27;</span>,<span class="hljs-string">&#x27;color&#x27;</span>,[<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">1</span>])
+<span class="hljs-built_in">hold</span> on
+<span class="hljs-built_in">plot</span>(x_gt(:,<span class="hljs-number">1</span>), x_gt(:,<span class="hljs-number">2</span>),<span class="hljs-string">&#x27;-v&#x27;</span>,<span class="hljs-string">&#x27;color&#x27;</span>,[<span class="hljs-number">0</span>,<span class="hljs-number">1</span>,<span class="hljs-number">0</span>])
+
+
+P_check = A*Q*A&#x27;;
+
+
+
+
+<span class="hljs-comment">%% 协方差(3.28)到(3.29) 协方差部分相等</span>
+a=inv(inv(P_check) + C&#x27;*inv(R)*C);
+b=P_check-P_check*C&#x27;*inv(C*P_check*C&#x27;+R)*C*P_check
+<span class="hljs-built_in">max</span>(<span class="hljs-built_in">max</span>(a-b)&#x27;) <span class="hljs-comment">%约等于0，两个式子相等</span>
+
+<span class="hljs-comment">%% </span>
+x_hat=x_check + P_check*C&#x27;*(C*P_check*C&#x27; + R)^<span class="hljs-number">-1</span> * (y-C*x_check)
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span> : <span class="hljs-number">200</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">mod</span>( <span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>) == <span class="hljs-number">0</span>
+        x_hat_y(<span class="hljs-built_in">i</span>/<span class="hljs-number">2</span>) = x_hat(<span class="hljs-built_in">i</span>);
+    <span class="hljs-keyword">else</span>
+        x_hat_x((<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>)/<span class="hljs-number">2</span>) = x_hat(<span class="hljs-built_in">i</span>);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-built_in">plot</span>(x_hat_x,x_hat_y,<span class="hljs-string">&#x27;-O&#x27;</span>,<span class="hljs-string">&#x27;color&#x27;</span>,[<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>])
+
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;观测结果(有噪音)&#x27;</span>,<span class="hljs-string">&#x27;用输入v估算的先验&#x27;</span>,<span class="hljs-string">&#x27;原始轨迹&#x27;</span>,<span class="hljs-string">&#x27;估算的后验轨迹&#x27;</span>)
+<span class="hljs-keyword">return</span>
+<span class="hljs-comment">%</span></code></pre></div>
+</div></div>
+					</body>
+				</html>
+			
